@@ -55,7 +55,7 @@
           </div>
           
           <div v-if="imagePreview || currentTask.image_url" class="preview-container">
-            <img :src="imagePreview || ('http://192.168.0.98:5000' + currentTask.image_url)" class="image-preview" alt="Превью" />
+            <img :src="imagePreview || ('https://backend-production-bf52.up.railway.app' + currentTask.image_url)" class="image-preview" alt="Превью" />
             <button type="button" @click="removeImage" class="remove-btn">Удалить фото</button>
           </div>
         </div>
@@ -120,7 +120,7 @@ const currentTask = reactive({
 const fetchAllTasks = async () => {
   isLoadingTasks.value = true;
   try {
-    const response = await axios.get('http://192.168.0.98:5000/api/tasks');
+    const response = await axios.get('https://backend-production-bf52.up.railway.app/api/tasks');
     
     // ПРОВЕРКА: сервер может возвращать { tasks: [...] } или просто [...]
     if (response.data.tasks) {
@@ -195,8 +195,8 @@ const saveTask = async () => {
 
   try {
     const url = isEditing.value 
-      ? `http://192.168.0.98:5000/api/admin/tasks/${editId.value}`
-      : 'http://192.168.0.98:5000/api/admin/tasks';
+      ? `http://https://backend-production-bf52.up.railway.app/api/admin/tasks/${editId.value}`
+      : 'http://https://backend-production-bf52.up.railway.app/api/admin/tasks';
     
     const method = isEditing.value ? 'put' : 'post';
 
@@ -229,7 +229,7 @@ const saveTask = async () => {
 const deleteTask = async (id) => {
   if (!confirm('Удалить задание?')) return;
   try {
-    await axios.delete(`http://192.168.0.98:5000/api/tasks/${id}`, {
+    await axios.delete(`http://https://backend-production-bf52.up.railway.app/api/tasks/${id}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
     tasks.value = tasks.value.filter(t => t.id !== id);
