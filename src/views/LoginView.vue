@@ -60,7 +60,7 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.post('http://https://backend-production-bf52.up.railway.app:5000/api/login', {
+    const response = await axios.post('https://backend-production-bf52.up.railway.app/api/login', {
       username: username.value,
       password: password.value
     });
@@ -99,6 +99,8 @@ const handleLogin = async () => {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
+
+
   max-width: 400px;
 }
 
