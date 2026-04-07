@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 // 1. Создаем базовый экземпляр Axios
-// Теперь нам не нужно писать http://localhost:5000/api в каждом компоненте
 const api = axios.create({
   baseURL: 'https://backend-production-bf52.up.railway.app' 
 });
