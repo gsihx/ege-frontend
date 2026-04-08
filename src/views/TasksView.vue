@@ -45,9 +45,9 @@
     </div>
 
     <div v-else-if="tasks && tasks.length > 0" class="tasks-list">
-      <div 
-        v-for="task in tasks" 
-        :key="task.id" 
+      <div
+        v-for="task in tasks"
+        :key="task.id"
         :class="['task-card', { 'is-solved': solvedTaskIds.includes(task.id) }]"
       >
         <div class="task-header">
@@ -60,24 +60,24 @@
             </span>
           </div>
         </div>
-        
+
         <div class="task-body">
           <div class="task-content">{{ task.content }}</div>
-          
+
           <div v-if="task.image_url" class="image-container">
-            <img 
-              :src="'http://192.168.0.98:5000' + task.image_url" 
-              alt="Иллюстрация к заданию" 
+            <img
+              :src="'https://backend-production-bf52.up.railway.app' + task.image_url"
+              alt="Иллюстрация к заданию"
               class="task-image"
             />
           </div>
         </div>
 
         <div class="task-actions">
-          <input 
-            v-model="userAnswers[task.id]" 
-            type="text" 
-            placeholder="Введите ответ" 
+          <input
+            v-model="userAnswers[task.id]"
+            type="text"
+            placeholder="Введите ответ"
             class="answer-input"
             :disabled="solvedTaskIds.includes(task.id)"
             @keyup.enter="checkAnswer(task.id)"
@@ -87,7 +87,7 @@
           </button>
         </div>
 
-        <div v-if="results[task.id] !== undefined" 
+        <div v-if="results[task.id] !== undefined"
              :class="['result-msg', results[task.id] ? 'correct' : 'incorrect']">
           {{ results[task.id] ? '✅ Верно! Прогресс сохранен.' : '❌ Неверно, попробуйте еще раз.' }}
         </div>
@@ -177,11 +177,11 @@ const fetchRandomExam = async () => {
   solvedTaskIds.value = []
   results.value = {}
   userAnswers.value = {}
-  
+
   try {
     const response = await api.get(`/generate_exam?subject=${selectedSubject.value}`)
     tasks.value = response.data.tasks || response.data
-    
+
     timeLeft.value = 235 * 60
     localStorage.setItem('exam_time_left', timeLeft.value)
     localStorage.setItem('is_exam_mode', 'true')
@@ -245,7 +245,7 @@ onMounted(() => {
     isRandomExam.value = true
     startTimer()
     // Загружаем текущие задачи из режима экзамена (нужно эндпоинт на бэкенде или хранить ID в localStorage)
-    fetchTasks() 
+    fetchTasks()
   } else {
     fetchTasks()
   }
@@ -258,26 +258,26 @@ onUnmounted(() => clearInterval(timerInterval.value))
 .tasks-container { max-width: 900px; margin: 0 auto; padding: 20px; font-family: 'Inter', sans-serif; }
 h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
 
-.actions-panel { 
-  display: flex; justify-content: space-between; align-items: center; 
-  background: white; padding: 20px; border-radius: 12px; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; 
+.actions-panel {
+  display: flex; justify-content: space-between; align-items: center;
+  background: white; padding: 20px; border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
 }
 
 .filters { display: flex; gap: 20px; }
 .filter-group { display: flex; flex-direction: column; gap: 5px; }
 .filter-group select { padding: 8px; border-radius: 6px; border: 1px solid #ddd; outline: none; }
 
-.gen-btn { 
-  background: #6e42b9; color: white; border: none; 
-  padding: 12px 20px; border-radius: 8px; font-weight: bold; 
-  cursor: pointer; transition: 0.3s; 
+.gen-btn {
+  background: #6e42b9; color: white; border: none;
+  padding: 12px 20px; border-radius: 8px; font-weight: bold;
+  cursor: pointer; transition: 0.3s;
 }
 .gen-btn:hover { background: #5a32a3; transform: translateY(-2px); }
 
-.timer-panel { 
-  position: sticky; top: 10px; z-index: 100; 
-  background: #2c3e50; color: white; padding: 15px; 
+.timer-panel {
+  position: sticky; top: 10px; z-index: 100;
+  background: #2c3e50; color: white; padding: 15px;
   border-radius: 10px; margin-bottom: 25px; text-align: center;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
@@ -303,10 +303,10 @@ h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
 .answer-input { flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 16px; transition: 0.3s; }
 .answer-input:focus { border-color: #42b983; outline: none; }
 
-.check-btn { 
-  background: #42b983; color: white; border: none; 
-  padding: 10px 25px; border-radius: 8px; cursor: pointer; 
-  font-weight: bold; transition: 0.3s; 
+.check-btn {
+  background: #42b983; color: white; border: none;
+  padding: 10px 25px; border-radius: 8px; cursor: pointer;
+  font-weight: bold; transition: 0.3s;
 }
 .check-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
 
