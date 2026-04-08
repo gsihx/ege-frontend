@@ -66,7 +66,7 @@ const handleRegister = async () => {
 
   try {
     // Отправляем через api.js
-    const response = await axios.post('https://...railway.app/api/register', data), {
+    const response = await axios.post('https://backend-production-bf52.up.railway.app/api/register', {
       username: username.value,
       password: password.value
     });
