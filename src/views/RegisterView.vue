@@ -46,41 +46,35 @@
 
 <script setup>
 import { ref } from 'vue';
-import api from '@/services/api.js'; // Используем наш API
-import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const username = ref('');
 const password = ref('');
-const confirmPassword = ref('');
-const router = useRouter();
+const loading = ref(false);
+const error = ref('');
 
 const handleRegister = async () => {
-  if (password.value !== confirmPassword.value) {
-    alert('Пароли не совпадают!');
-    return;
-  }
-  if (!username.value || !password.value) {
-    alert('Пожалуйста, заполните все поля!');
-    return;
-  }
-
+  loading.value = true;
+  error.value = '';
+  
   try {
-    // Отправляем через api.js
+    // ВАЖНО: Мы убрали слово data и закрываем скобку axios.post только в самом конце
     const response = await axios.post('https://backend-production-bf52.up.railway.app/api/register', {
       username: username.value,
       password: password.value
     });
-
-    alert('Регистрация прошла успешно! Теперь вы можете войти.');
-    router.push({ name: 'login' });
-
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Произошла неизвестная ошибка.';
-    alert(`Ошибка регистрации: ${errorMessage}`);
+    
+    if (response.status === 201) {
+      // При успешной регистрации перенаправляем на страницу входа
+      window.location.href = '/login';
+    }
+  } catch (err) {
+    error.value = err.response?.data?.error || 'Ошибка при регистрации. Проверьте бэкенд.';
+  } finally {
+    loading.value = false;
   }
 };
 </script>
-
 <style scoped>
 .register-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
 .register-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); width: 100%; max-width: 420px; text-align: center; }
