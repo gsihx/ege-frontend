@@ -195,38 +195,58 @@ const fetchRandomExam = async () => {
 }
 
 const checkAnswer = async (taskId) => {
-  // 1. Берем ответ из массива ответов
-  const answer = userAnswers.value[taskId]
-  if (!answer || !answer.trim()) return
+  console.log("--- СТАРТ ПРОВЕРКИ ---");
+  const answer = userAnswers.value[taskId];
+  console.log("ID задачи:", taskId);
+  console.log("Введенный ответ:", answer);
+
+  if (!answer || !answer.trim()) {
+    alert("Поле пустое!");
+    return;
+  }
 
   try {
-    // 2. Отправляем запрос (название поля 'answer', как в Python)
-    const response = await api.post('/check_answer', {
-      task_id: taskId,
-      answer: answer.trim() 
-    })
-
-    // 3. Получаем результат (поле 'is_correct', как в Python)
-    const isCorrect = response.data.is_correct
-    results.value[taskId] = isCorrect
-
-    // 4. Если верно, добавляем в список решенных
-    if (isCorrect && !solvedTaskIds.value.includes(taskId)) {
-      solvedTaskIds.value.push(taskId)
-    }
+    console.log("Отправка запроса на бэкенд...");
     
-    // Выведем алерт для теста, чтобы ты увидел, что связь есть
+    // Используем axios напрямую, чтобы исключить ошибки в кастомном инстансе api
+    const token = localStorage.getItem('token');
+    const response = await axios.post('https://ege-api2-gsihx.amvera.io/check_answer', {
+      task_id: taskId,
+      answer: answer.trim()
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    console.log("ОТВЕТ СЕРВЕРА:", response.data);
+
+    const isCorrect = response.data.is_correct;
+    results.value[taskId] = isCorrect;
+
     if (isCorrect) {
-      alert("Правильно! 🎉")
+      alert("Правильно! 🎉");
     } else {
-      alert("Неверно, попробуй еще раз.")
+      alert(`Неверно. Правильный ответ: ${response.data.correct_answer}`);
     }
 
   } catch (error) {
-    console.error("Ошибка запроса:", error.response || error)
-    alert('Произошла ошибка при проверке. Проверь консоль (F12).')
+    console.error("--- ОШИБКА ПРИ ПРОВЕРКЕ ---");
+    console.dir(error); // Развернет объект ошибки в консоли
+
+    if (error.response) {
+      // Сервер ответил, но с ошибкой (например, 401, 404, 500)
+      console.log("Статус ошибки:", error.response.status);
+      console.log("Данные ошибки:", error.response.data);
+      alert(`Ошибка сервера (${error.response.status}): ${JSON.stringify(error.response.data)}`);
+    } else if (error.request) {
+      // Запрос ушел, но ответа нет вообще (проблемы с сетью или CORS)
+      alert("Сервер не ответил. Проверь, запущен ли бэкенд в Amvera и нет ли ошибок CORS в консоли.");
+    } else {
+      alert("Ошибка при создании запроса: " + error.message);
+    }
   }
-}
+};
 const finishExam = async () => {
   const score = tasks.value.filter(t => solvedTaskIds.value.includes(t.id)).length
   try {
