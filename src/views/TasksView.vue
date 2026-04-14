@@ -66,7 +66,7 @@
 
           <div v-if="task.image_url" class="image-container">
             <img
-              :src="'https://backend-production-bf52.up.railway.app' + task.image_url"
+              :src="'https://ege-api2-gsihx.amvera.io' + task.image_url"
               alt="Иллюстрация к заданию"
               class="task-image"
             />

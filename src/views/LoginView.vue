@@ -60,7 +60,7 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.post('https://backend-production-bf52.up.railway.app/api/login', {
+    const response = await axios.post('https://ege-api2-gsihx.amvera.io/api/login', {
       username: username.value,
       password: password.value
     });

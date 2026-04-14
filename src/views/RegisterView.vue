@@ -59,7 +59,7 @@ const handleRegister = async () => {
   
   try {
     // ВАЖНО: Мы убрали слово data и закрываем скобку axios.post только в самом конце
-    const response = await axios.post('https://backend-production-bf52.up.railway.app/api/register', {
+    const response = await axios.post('https://ege-api2-gsihx.amvera.io/api/register', {
       username: username.value,
       password: password.value
     });
