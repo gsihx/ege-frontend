@@ -184,7 +184,7 @@ const removeImage = () => {
 const saveTask = async () => {
   isSubmitting.value = true;
   const formData = new FormData();
-  formData.ahttps://ege-api2-gsihx.amvera.ioppend('subject', currentTask.subject);
+  formData.append('subject', currentTask.subject);
   formData.append('task_number', currentTask.task_number);
   formData.append('variant_number', currentTask.variant_number);
   formData.append('content', currentTask.content);
