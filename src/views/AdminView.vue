@@ -55,7 +55,7 @@
           </div>
           
           <div v-if="imagePreview || currentTask.image_url" class="preview-container">
-            <img :src="imagePreview || ('https://backend-production-bf52.up.railway.app' + currentTask.image_url)" class="image-preview" alt="Превью" />
+            <img :src="imagePreview || ('https://ege-api2-gsihx.amvera.io' + currentTask.image_url)" class="image-preview" alt="Превью" />
             <button type="button" @click="removeImage" class="remove-btn">Удалить фото</button>
           </div>
         </div>
@@ -120,7 +120,7 @@ const currentTask = reactive({
 const fetchAllTasks = async () => {
   isLoadingTasks.value = true;
   try {
-    const response = await axios.get('https://backend-production-bf52.up.railway.app/api/tasks');
+    const response = await axios.get('https://ege-api2-gsihx.amvera.io/api/tasks');
     
     // ПРОВЕРКА: сервер может возвращать { tasks: [...] } или просто [...]
     if (response.data.tasks) {
@@ -184,7 +184,7 @@ const removeImage = () => {
 const saveTask = async () => {
   isSubmitting.value = true;
   const formData = new FormData();
-  formData.append('subject', currentTask.subject);
+  formData.ahttps://ege-api2-gsihx.amvera.ioppend('subject', currentTask.subject);
   formData.append('task_number', currentTask.task_number);
   formData.append('variant_number', currentTask.variant_number);
   formData.append('content', currentTask.content);
@@ -195,8 +195,8 @@ const saveTask = async () => {
 
   try {
     const url = isEditing.value 
-      ? `http://https://backend-production-bf52.up.railway.app/api/admin/tasks/${editId.value}`
-      : 'http://https://backend-production-bf52.up.railway.app/api/admin/tasks';
+      ? `/api/admin/tasks/${editId.value}`
+      : '/api/admin/tasks';
     
     const method = isEditing.value ? 'put' : 'post';
 
@@ -229,7 +229,7 @@ const saveTask = async () => {
 const deleteTask = async (id) => {
   if (!confirm('Удалить задание?')) return;
   try {
-    await axios.delete(`http://https://backend-production-bf52.up.railway.app/api/tasks/${id}`, {
+    await axios.delete(`https://ege-api2-gsihx.amvera.io/api/tasks/${id}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
     tasks.value = tasks.value.filter(t => t.id !== id);
