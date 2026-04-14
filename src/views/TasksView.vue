@@ -195,22 +195,38 @@ const fetchRandomExam = async () => {
 }
 
 const checkAnswer = async (taskId) => {
+  // 1. Берем ответ из массива ответов
   const answer = userAnswers.value[taskId]
   if (!answer || !answer.trim()) return
+
   try {
+    // 2. Отправляем запрос (название поля 'answer', как в Python)
     const response = await api.post('/check_answer', {
       task_id: taskId,
-      user_answer: answer.trim()
+      answer: answer.trim() 
     })
-    results.value[taskId] = response.data.correct
-    if (response.data.correct && !solvedTaskIds.value.includes(taskId)) {
+
+    // 3. Получаем результат (поле 'is_correct', как в Python)
+    const isCorrect = response.data.is_correct
+    results.value[taskId] = isCorrect
+
+    // 4. Если верно, добавляем в список решенных
+    if (isCorrect && !solvedTaskIds.value.includes(taskId)) {
       solvedTaskIds.value.push(taskId)
     }
+    
+    // Выведем алерт для теста, чтобы ты увидел, что связь есть
+    if (isCorrect) {
+      alert("Правильно! 🎉")
+    } else {
+      alert("Неверно, попробуй еще раз.")
+    }
+
   } catch (error) {
-    alert('Пожалуйста, войдите в аккаунт для сохранения результата.')
+    console.error("Ошибка запроса:", error.response || error)
+    alert('Произошла ошибка при проверке. Проверь консоль (F12).')
   }
 }
-
 const finishExam = async () => {
   const score = tasks.value.filter(t => solvedTaskIds.value.includes(t.id)).length
   try {
