@@ -61,6 +61,20 @@
 
     <div class="actions">
       <router-link to="/tasks" class="action-btn">К новым задачам! 🎯</router-link>
+      <router-link
+	v-if='isAdmin"
+	to="/admin"
+	class="action-btn admin-btn"
+      >
+	⚙️ Панель администратора
+      </router-link>
+      <button 
+        v-if="currentUsername === 'gsihx231213'" 
+        @click="secretAction" 
+        class="action-btn secret-btn"
+      >
+        👑 Секретная кнопка Создателя
+      </button>
     </div>
   </div>
 </template>
@@ -73,7 +87,11 @@ import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const auth = useAuthStore();
+const isAdmin = ref(localStorage.getItem('is_admin') === 'true');
+const secretAction = () => {
+  alert('Доступ разрешен. Привет, Создатель!');
 
+const currentUsername = ref(localStorage.getItem('username'));
 const username = ref(localStorage.getItem('username') || 'Ученик');
 const solvedTasksCount = ref(0);
 const examHistory = ref([]);
@@ -254,5 +272,25 @@ onMounted(fetchData);
   text-align: center;
   padding: 20px;
   color: #94a3b8;
+}
+
+.admin-btn {
+  background: #475569; /* Строгий темно-серый цвет для админки */
+  margin-top: 15px;
+}
+.admin-btn:hover {
+  background: #334155;
+}
+
+.secret-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706); /* Золотая кнопка */
+  margin-top: 15px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+.secret-btn:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
 }
 </style>
