@@ -108,7 +108,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import api from '@/services/api.js'
 import { useRouter } from 'vue-router'
-
+import axios from 'axios'; // Добавь это в самое начало блока <script setup>
 const router = useRouter()
 const tasks = ref([])
 const solvedTaskIds = ref([])
