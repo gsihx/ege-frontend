@@ -89,15 +89,20 @@ import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const auth = useAuthStore();
-const isAdmin = ref(localStorage.getItem('is_admin') === 'true');
-const secretAction = () => {
-  alert('Доступ разрешен. Привет, Создатель!');
 
-const currentUsername = ref(localStorage.getItem('username'));
 const username = ref(localStorage.getItem('username') || 'Ученик');
 const solvedTasksCount = ref(0);
 const examHistory = ref([]);
 const achievements = ref([]);
+
+// Переменные для проверки прав
+const isAdmin = ref(localStorage.getItem('is_admin') === 'true');
+const currentUsername = ref(localStorage.getItem('username'));
+
+// Действие для секретной кнопки
+const secretAction = () => {
+  alert('Доступ разрешен. Привет, Создатель!');
+};
 
 // Считаем средний процент успеха
 const averageScore = computed(() => {
@@ -108,14 +113,12 @@ const averageScore = computed(() => {
 
 const fetchData = async () => {
   try {
-    // Используем относительные пути, так как базовый URL уже в api.js
     const solvedRes = await api.get('/user_solved_tasks');
     solvedTasksCount.value = solvedRes.data.solved_task_ids ? solvedRes.data.solved_task_ids.length : 0;
 
     const historyRes = await api.get('/user_exam_history');
     examHistory.value = historyRes.data.history || [];
 
-    // ИСПРАВЛЕНО: убран лишний /api/
     const achRes = await api.get('/user_achievements'); 
     achievements.value = achRes.data.achievements || [];
     
@@ -139,58 +142,16 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
-.dashboard-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 30px 20px;
-  font-family: 'Inter', sans-serif;
-}
-
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 40px;
-}
-
+.dashboard-container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; font-family: 'Inter', sans-serif; }
+.dashboard-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
 .welcome-text { color: #64748b; margin-top: 5px; }
 
 /* ДОСТИЖЕНИЯ */
-.achievements-section {
-  background: #fff;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
-
-.achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.ach-card {
-  display: flex;
-  gap: 15px;
-  padding: 15px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
-}
-
-.ach-card.locked {
-  opacity: 0.5;
-  filter: grayscale(1);
-}
-
-.ach-card:not(.locked):hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
+.achievements-section { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 30px; }
+.achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+.ach-card { display: flex; gap: 15px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+.ach-card.locked { opacity: 0.5; filter: grayscale(1); }
+.ach-card:not(.locked):hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 .ach-icon { font-size: 24px; }
 .ach-info { display: flex; flex-direction: column; }
 .ach-name { font-weight: 600; font-size: 14px; color: #1e293b; }
@@ -198,42 +159,15 @@ onMounted(fetchData);
 .ach-status { font-size: 11px; margin-top: 4px; font-weight: bold; color: #10b981; }
 
 /* СТАТИСТИКА */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-card {
-  background: #fff;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px; }
+.stat-card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center; }
 .stat-card h3 { font-size: 16px; color: #1e293b; margin-bottom: 10px; }
 .stat-value { font-size: 32px; font-weight: 800; color: #2563eb; }
 .stat-label { font-size: 13px; color: #94a3b8; margin-top: 5px; }
 
 /* ИСТОРИЯ */
-.history-section {
-  background: #fff;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
-
-.history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
+.history-section { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 30px; }
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
 .history-item:last-child { border-bottom: none; }
 .exam-subject { font-weight: 600; color: #1e293b; display: block; }
 .exam-date { font-size: 12px; color: #94a3b8; }
@@ -242,57 +176,16 @@ onMounted(fetchData);
 .divider { color: #cbd5e1; margin: 0 4px; }
 
 /* КНОПКИ */
-.logout-btn {
-  background: #fee2e2;
-  color: #ef4444;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
+.logout-btn { background: #fee2e2; color: #ef4444; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .logout-btn:hover { background: #fecaca; }
-
-.action-btn {
-  display: block;
-  width: 100%;
-  text-align: center;
-  background: #2563eb;
-  color: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 700;
-  transition: background 0.2s;
-}
-
+.action-btn { display: block; width: 100%; text-align: center; background: #2563eb; color: #fff; padding: 16px; border-radius: 12px; text-decoration: none; font-weight: 700; transition: background 0.2s; box-sizing: border-box;}
 .action-btn:hover { background: #1d4ed8; }
 
-.loading-placeholder, .empty-history {
-  text-align: center;
-  padding: 20px;
-  color: #94a3b8;
-}
+.admin-btn { background: #475569; margin-top: 15px; }
+.admin-btn:hover { background: #334155; }
 
-.admin-btn {
-  background: #475569; /* Строгий темно-серый цвет для админки */
-  margin-top: 15px;
-}
-.admin-btn:hover {
-  background: #334155;
-}
+.secret-btn { background: linear-gradient(135deg, #f59e0b, #d97706); margin-top: 15px; border: none; cursor: pointer; font-size: 16px; color: white; font-weight: bold;}
+.secret-btn:hover { background: linear-gradient(135deg, #d97706, #b45309); transform: translateY(-2px); }
 
-.secret-btn {
-  background: linear-gradient(135deg, #f59e0b, #d97706); /* Золотая кнопка */
-  margin-top: 15px;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-.secret-btn:hover {
-  background: linear-gradient(135deg, #d97706, #b45309);
-  transform: translateY(-2px);
-}
+.loading-placeholder, .empty-history { text-align: center; padding: 20px; color: #94a3b8; }
 </style>
