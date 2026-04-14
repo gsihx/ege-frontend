@@ -61,15 +61,17 @@
 
     <div class="actions">
       <router-link to="/tasks" class="action-btn">К новым задачам! 🎯</router-link>
-      <router-link
-	v-if="isAdmin"
-	to="/admin"
-	class="action-btn admin-btn"
+
+      <router-link 
+        v-if="isAdmin" 
+        to="/admin" 
+        class="action-btn admin-btn"
       >
-	⚙️ Панель администратора
+        ⚙️ Панель администратора
       </router-link>
+
       <button 
-        v-if="currentUsername === 'gsihx231213' 
+        v-if="currentUsername === 'gsihx231213'" 
         @click="secretAction" 
         class="action-btn secret-btn"
       >
