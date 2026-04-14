@@ -120,9 +120,10 @@ const currentTask = reactive({
 const fetchAllTasks = async () => {
   isLoadingTasks.value = true;
   try {
-    // ВАЖНО: запрос идет просто на /tasks
+    // ВАЖНО: запрос идет просто на /tasks, без /api
     const response = await axios.get('https://ege-api2-gsihx.amvera.io/tasks');
     
+    // ПРОВЕРКА: сервер может возвращать { tasks: [...] } или просто [...]
     if (response.data.tasks) {
       tasks.value = response.data.tasks;
     } else {
