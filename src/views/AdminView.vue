@@ -195,9 +195,11 @@ const saveTask = async () => {
   }
 
   try {
+    // 1. ДОБАВЛЯЕМ ПОЛНЫЙ АДРЕС БЭКЕНДА
+    const baseUrl = 'https://ege-api2-gsihx.amvera.io';
     const url = isEditing.value 
-      ? `/api/admin/tasks/${editId.value}`
-      : '/api/admin/tasks';
+      ? `${baseUrl}/api/admin/tasks/${editId.value}` 
+      : `${baseUrl}/api/admin/tasks`;
     
     const method = isEditing.value ? 'put' : 'post';
 
@@ -206,7 +208,6 @@ const saveTask = async () => {
       url: url,
       data: formData,
       headers: {
-        // ПРОВЕРЬ ЭТУ СТРОКУ:
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'multipart/form-data'
       }
@@ -218,9 +219,10 @@ const saveTask = async () => {
   } catch (error) {
     if (error.response?.status === 401) {
       alert('Сессия истекла. Пожалуйста, войдите в аккаунт снова.');
-      // Можно перенаправить на страницу логина: router.push('/login')
     } else {
-      alert('Ошибка доступа: ' + (error.response?.data?.error || 'Нет прав'));
+      // Чуть улучшил вывод ошибки, чтобы мы видели, если сервер ругается
+      console.error(error);
+      alert('Ошибка при сохранении: ' + (error.response?.data?.error || error.message));
     }
   } finally {
     isSubmitting.value = false;
