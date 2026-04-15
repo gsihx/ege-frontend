@@ -225,9 +225,9 @@ const checkAnswer = async (taskId) => {
     results.value[taskId] = isCorrect;
 
     if (isCorrect) {
-      alert("Правильно! 🎉");
+     // alert("Правильно! 🎉");
     } else {
-      alert(`Неверно. Правильный ответ: ${response.data.correct_answer}`);
+     // alert(`Неверно. Правильный ответ: ${response.data.correct_answer}`);
     }
 
   } catch (error) {
@@ -248,8 +248,6 @@ const checkAnswer = async (taskId) => {
   }
 };
 const finishExam = async () => {
-  // 1. ПРАВИЛЬНЫЙ ПОДСЧЕТ БАЛЛОВ
-  // Перебираем все ключи в объекте results и считаем те, где значение true
   let calculatedScore = 0;
   for (const taskId in results.value) {
     if (results.value[taskId] === true) {
@@ -260,22 +258,19 @@ const finishExam = async () => {
   try {
     const token = localStorage.getItem('token');
     
-    // 2. ОТПРАВЛЯЕМ ПОДСЧИТАННЫЙ БАЛЛ НА БЭКЕНД
     await axios.post('https://ege-api2-gsihx.amvera.io/save_exam_result', {
-      subject: 'Математика', // Или твоя переменная с предметом
-      score: calculatedScore, // Передаем нашу посчитанную цифру!
-      total: examTasks.value.length // Общее количество задач в КИМе
+      subject: 'Математика', 
+      score: calculatedScore, 
+      // 1. МЕНЯЕМ examTasks НА tasks (или твое название)
+      total: tasks.value.length 
     }, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
 
-    alert(`Вариант завершен! Твой результат: ${calculatedScore} из ${examTasks.value.length}`);
-    
-    // Только ПОСЛЕ отправки можно очищать данные (если ты это делаешь)
-    // results.value = {}; 
-    // userAnswers.value = {};
+    // 2. МЕНЯЕМ examTasks НА tasks И ЗДЕСЬ ТОЖЕ
+    alert(`Вариант завершен! Твой результат: ${calculatedScore} из ${tasks.value.length}`);
 
   } catch (error) {
     console.error("Ошибка при сохранении КИМа:", error);
