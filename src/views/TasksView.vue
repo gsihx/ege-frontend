@@ -62,8 +62,12 @@
         </div>
 
         <div class="task-body">
-          <div class="task-content">{{ task.content }}</div>
-
+          <div class="task-content" v-html="task.content"></div>
+	  <div v-if="task.file_url" class="attachment-section" style="margin: 15px 0;">
+	    <a :href="'https://ege-api2-gsihx.amvera.io' + task.file_url" target="_blank" class="download-link" download>	
+	      📥 Скачать прикрепленный файл
+	    </a>
+	 </div>
           <div v-if="task.image_url" class="image-container">
             <img
               :src="'https://ege-api2-gsihx.amvera.io' + task.image_url"

@@ -262,7 +262,8 @@ const saveTask = async () => {
 const deleteTask = async (id) => {
   if (!confirm('Удалить задание?')) return;
   try {
-    await axios.delete(`https://ege-api2-gsihx.amvera.io/api/tasks/${id}`, {
+    // ВАЖНО: добавили /admin/ в путь
+    await axios.delete(`https://ege-api2-gsihx.amvera.io/api/admin/tasks/${id}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
     tasks.value = tasks.value.filter(t => t.id !== id);
