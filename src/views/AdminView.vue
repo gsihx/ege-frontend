@@ -41,22 +41,35 @@
         </div>
 
         <div class="form-group">
-          <label>Текст задания:</label>
+          <label>Текст задания (поддерживает HTML теги, например &lt;br&gt;, &lt;b&gt;):</label>
           <textarea v-model="currentTask.content" rows="4" placeholder="Введите условие задачи..." required></textarea>
         </div>
 
         <div class="form-group">
           <label>Изображение (необязательно):</label>
           <div class="file-upload-wrapper">
-            <input type="file" @change="handleFileUpload" accept="image/*" class="file-input" id="file-input" />
-            <label for="file-input" class="file-label">
-              {{ selectedFile ? 'Файл выбран: ' + selectedFile.name : 'Выберите файл изображения' }}
+            <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" id="image-input" />
+            <label for="image-input" class="file-label">
+              {{ selectedImage ? 'Фото выбрано: ' + selectedImage.name : 'Выберите файл изображения' }}
             </label>
           </div>
           
           <div v-if="imagePreview || currentTask.image_url" class="preview-container">
             <img :src="imagePreview || ('https://ege-api2-gsihx.amvera.io' + currentTask.image_url)" class="image-preview" alt="Превью" />
             <button type="button" @click="removeImage" class="remove-btn">Удалить фото</button>
+          </div>
+        </div>
+
+        <div class="form-group" v-if="currentTask.subject === 'Информатика'">
+          <label>Прикрепленный файл (txt, xlsx - необязательно):</label>
+          <div class="file-upload-wrapper">
+            <input type="file" @change="handleDocUpload" accept=".txt,.csv,.xlsx,.xls,.doc,.docx" class="file-input" id="doc-input" />
+            <label for="doc-input" class="file-label doc-label">
+              {{ selectedDoc ? 'Файл готов: ' + selectedDoc.name : '📥 Прикрепить документ к задаче' }}
+            </label>
+          </div>
+          <div v-if="currentTask.file_url && !selectedDoc" class="preview-container">
+            Текущий файл: <a :href="'https://ege-api2-gsihx.amvera.io' + currentTask.file_url" target="_blank">Скачать</a>
           </div>
         </div>
 
@@ -105,25 +118,26 @@ const isSubmitting = ref(false);
 const isLoadingTasks = ref(false);
 const isEditing = ref(false);
 const editId = ref(null);
-const selectedFile = ref(null);
+
+// Разделяем файлы на картинки и документы
+const selectedImage = ref(null);
 const imagePreview = ref(null);
+const selectedDoc = ref(null);
 
 const currentTask = reactive({
   subject: 'Информатика',
   task_number: null,
-  variant_number: 1, // По умолчанию 1 вариант
+  variant_number: 1,
   content: '',
   correct_answer: '',
-  image_url: null
+  image_url: null,
+  file_url: null
 });
 
 const fetchAllTasks = async () => {
   isLoadingTasks.value = true;
   try {
-    // ВАЖНО: запрос идет просто на /tasks, без /api
     const response = await axios.get('https://ege-api2-gsihx.amvera.io/tasks');
-    
-    // ПРОВЕРКА: сервер может возвращать { tasks: [...] } или просто [...]
     if (response.data.tasks) {
       tasks.value = response.data.tasks;
     } else {
@@ -145,8 +159,11 @@ const startEdit = (task) => {
   currentTask.content = task.content;
   currentTask.correct_answer = task.correct_answer;
   currentTask.image_url = task.image_url;
-  selectedFile.value = null;
+  currentTask.file_url = task.file_url;
+  
+  selectedImage.value = null;
   imagePreview.value = null;
+  selectedDoc.value = null;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -162,26 +179,36 @@ const resetForm = () => {
   currentTask.content = '';
   currentTask.correct_answer = '';
   currentTask.image_url = null;
+  currentTask.file_url = null;
   removeImage();
+  selectedDoc.value = null;
 };
 
-const handleFileUpload = (event) => {
+// Обработка загрузки картинки
+const handleImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
-    selectedFile.value = file;
+    selectedImage.value = file;
     imagePreview.value = URL.createObjectURL(file);
   }
 };
 
+// Обработка загрузки документа
+const handleDocUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    selectedDoc.value = file;
+  }
+};
+
 const removeImage = () => {
-  selectedFile.value = null;
+  selectedImage.value = null;
   imagePreview.value = null;
   currentTask.image_url = null;
-  const input = document.getElementById('file-input');
+  const input = document.getElementById('image-input');
   if (input) input.value = '';
 };
 
-// Найди это место в AdminView.vue
 const saveTask = async () => {
   isSubmitting.value = true;
   const formData = new FormData();
@@ -190,12 +217,16 @@ const saveTask = async () => {
   formData.append('variant_number', currentTask.variant_number);
   formData.append('content', currentTask.content);
   formData.append('correct_answer', currentTask.correct_answer);
-  if (selectedFile.value) {
-    formData.append('image', selectedFile.value);
+  
+  if (selectedImage.value) {
+    formData.append('image', selectedImage.value);
+  }
+  // Добавляем документ в форму отправки
+  if (selectedDoc.value) {
+    formData.append('document', selectedDoc.value);
   }
 
   try {
-    // 1. ДОБАВЛЯЕМ ПОЛНЫЙ АДРЕС БЭКЕНДА
     const baseUrl = 'https://ege-api2-gsihx.amvera.io';
     const url = isEditing.value 
       ? `${baseUrl}/api/admin/tasks/${editId.value}` 
@@ -220,7 +251,6 @@ const saveTask = async () => {
     if (error.response?.status === 401) {
       alert('Сессия истекла. Пожалуйста, войдите в аккаунт снова.');
     } else {
-      // Чуть улучшил вывод ошибки, чтобы мы видели, если сервер ругается
       console.error(error);
       alert('Ошибка при сохранении: ' + (error.response?.data?.error || error.message));
     }
@@ -245,6 +275,7 @@ onMounted(fetchAllTasks);
 </script>
 
 <style scoped>
+/* Все твои предыдущие стили сохранены */
 .admin-container { display: flex; justify-content: center; padding: 40px 20px; background-color: #f0f2f5; min-height: 100vh; }
 .admin-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 750px; }
 h2 { color: #333; margin-bottom: 5px; }
@@ -256,8 +287,10 @@ h3 { color: #444; border-left: 4px solid #42b983; padding-left: 10px; margin-bot
 label { font-weight: 600; margin-bottom: 8px; color: #444; }
 input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
 .file-label { display: block; padding: 12px; background: #f8f9fa; border: 2px dashed #ccc; border-radius: 6px; text-align: center; cursor: pointer; }
+/* Добавил стиль для кнопки документа */
+.doc-label { border-color: #3498db; background: #eaf4fc; color: #2980b9; }
 .file-input { display: none; }
-.preview-container { text-align: center; margin-top: 10px; border: 1px solid #eee; padding: 10px; border-radius: 8px; }
+.preview-container { text-align: center; margin-top: 10px; border: 1px solid #eee; padding: 10px; border-radius: 8px; font-size: 0.9rem;}
 .image-preview { max-width: 100%; max-height: 200px; border-radius: 4px; }
 .button-group { display: flex; gap: 10px; margin-top: 10px; }
 .submit-btn { flex: 2; background-color: #42b983; color: white; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
