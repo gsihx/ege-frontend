@@ -63,11 +63,13 @@
 
         <div class="task-body">
           <div class="task-content" v-html="task.content"></div>
-	  <div v-if="task.file_url" class="attachment-section" style="margin: 15px 0;">
-	    <a :href="'https://ege-api2-gsihx.amvera.io' + task.file_url" target="_blank" class="download-link" download>	
-	      📥 Скачать прикрепленный файл
-	    </a>
-	 </div>
+          
+          <div v-if="task.file_url" class="attachment-section" style="margin: 15px 0;">
+            <a :href="'https://ege-api2-gsihx.amvera.io' + task.file_url" target="_blank" class="download-link" download>  
+              📥 Скачать прикрепленный файл
+            </a>
+          </div>
+          
           <div v-if="task.image_url" class="image-container">
             <img
               :src="'https://ege-api2-gsihx.amvera.io' + task.image_url"
@@ -75,7 +77,26 @@
               class="task-image"
             />
           </div>
-        </div>
+
+          <div v-if="task.extra_files && task.extra_files !== '[]'" class="attachment-section" style="margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a 
+              v-for="(file, index) in JSON.parse(task.extra_files)" 
+              :key="'file-'+index"
+              :href="'https://ege-api2-gsihx.amvera.io' + file" 
+              target="_blank" class="download-link" download>
+              📥 Скачать файл {{ index + 1 }}
+            </a>
+          </div>
+
+          <div v-if="task.extra_images && task.extra_images !== '[]'" class="image-container" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            <img 
+              v-for="(img, index) in JSON.parse(task.extra_images)" 
+              :key="'img-'+index"
+              :src="'https://ege-api2-gsihx.amvera.io' + img" 
+              alt="Иллюстрация" 
+              class="task-image" 
+            />
+          </div>
 
         <div class="task-actions">
           <input
