@@ -97,6 +97,7 @@
               class="task-image" 
             />
           </div>
+        </div>
 
         <div class="task-actions">
           <input
