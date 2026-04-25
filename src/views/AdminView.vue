@@ -48,7 +48,7 @@
         <div class="form-group">
           <label>Изображение (необязательно):</label>
           <div class="file-upload-wrapper">
-            <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" id="image-input" />
+            <input type="file" @change="handleImagesUpload" accept="image/*" class="file-input" id="image-input" multiple />
             <label for="image-input" class="file-label">
               {{ selectedImage ? 'Фото выбрано: ' + selectedImage.name : 'Выберите файл изображения' }}
             </label>
@@ -63,7 +63,7 @@
         <div class="form-group" v-if="currentTask.subject === 'Информатика'">
           <label>Прикрепленный файл (txt, xlsx - необязательно):</label>
           <div class="file-upload-wrapper">
-            <input type="file" @change="handleDocUpload" accept=".txt,.csv,.xlsx,.xls,.doc,.docx" class="file-input" id="doc-input" />
+           <input type="file" @change="handleDocsUpload" accept=".txt,.csv,.xlsx,.xls,.doc,.docx" class="file-input" id="doc-input" multiple />
             <label for="doc-input" class="file-label doc-label">
               {{ selectedDoc ? 'Файл готов: ' + selectedDoc.name : '📥 Прикрепить документ к задаче' }}
             </label>
@@ -120,9 +120,9 @@ const isEditing = ref(false);
 const editId = ref(null);
 
 // Разделяем файлы на картинки и документы
-const selectedImage = ref(null);
+const selectedImages = ref([]);
 const imagePreview = ref(null);
-const selectedDoc = ref(null);
+const selectedDocs = ref([]);
 
 const currentTask = reactive({
   subject: 'Информатика',
@@ -185,20 +185,14 @@ const resetForm = () => {
 };
 
 // Обработка загрузки картинки
-const handleImageUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    selectedImage.value = file;
-    imagePreview.value = URL.createObjectURL(file);
-  }
+const handleImagesUpload = (event) => {
+  // Array.from превращает список файлов в удобный массив
+  selectedImages.value = Array.from(event.target.files);
 };
 
 // Обработка загрузки документа
-const handleDocUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    selectedDoc.value = file;
-  }
+const handleDocsUpload = (event) => {
+  selectedDocs.value = Array.from(event.target.files);
 };
 
 const removeImage = () => {
@@ -219,11 +213,11 @@ const saveTask = async () => {
   formData.append('correct_answer', currentTask.correct_answer);
   
   if (selectedImage.value) {
-    formData.append('image', selectedImage.value);
+    formData.append('images', selectedImage.value);
   }
   // Добавляем документ в форму отправки
   if (selectedDoc.value) {
-    formData.append('document', selectedDoc.value);
+    formData.append('documents', selectedDoc.value);
   }
 
 try {

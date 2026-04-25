@@ -7,7 +7,7 @@
         <div class="filter-group">
           <label>Предмет:</label>
           <select v-model="selectedSubject" @change="fetchTasks">
-            <option value="Математика(профиль)">Математика</option>
+            <option value="Математика">Математика</option>
             <option value="Информатика">Информатика</option>
             <option value="Русский язык">Русский язык</option>
           </select>
