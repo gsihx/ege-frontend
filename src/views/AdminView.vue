@@ -226,7 +226,7 @@ const saveTask = async () => {
     formData.append('document', selectedDoc.value);
   }
 
-  try {
+try {
     const baseUrl = 'https://ege-api2-gsihx.amvera.io';
     const url = isEditing.value 
       ? `${baseUrl}/api/admin/tasks/${editId.value}` 
@@ -244,8 +244,27 @@ const saveTask = async () => {
       }
     });
 
-    alert(isEditing.value ? 'Задание обновлено!' : 'Задание добавлено!');
-    cancelEdit();
+    // --- НАЧАЛО НОВОЙ ЛОГИКИ СБРОСА ---
+    if (isEditing.value) {
+      alert('Задание обновлено!');
+      cancelEdit(); // Если редактировали — сбрасываем всё и выходим из режима
+    } else {
+      alert('Задание добавлено! Можно вводить следующее.');
+      // ЧАСТИЧНЫЙ СБРОС: очищаем только контент, оставляя предмет и номера
+      currentTask.content = '';
+      currentTask.correct_answer = '';
+      currentTask.image_url = null;
+      currentTask.file_url = null;
+      
+      // Очищаем прикрепленные файлы
+      removeImage();
+      selectedDoc.value = null;
+      
+      // Фокус автоматически возвращается в поле текста (удобно для быстрой вставки)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
     fetchAllTasks();
   } catch (error) {
     if (error.response?.status === 401) {
