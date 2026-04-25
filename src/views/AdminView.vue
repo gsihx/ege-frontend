@@ -46,29 +46,44 @@
         </div>
 
         <div class="form-group">
-          <label>Изображение (необязательно):</label>
+          <label>Изображения (можно выделить сразу несколько):</label>
           <div class="file-upload-wrapper">
             <input type="file" @change="handleImagesUpload" accept="image/*" class="file-input" id="image-input" multiple />
             <label for="image-input" class="file-label">
-              {{ selectedImage ? 'Фото выбрано: ' + selectedImage.name : 'Выберите файл изображения' }}
+              {{ selectedImages.length > 0 ? `Выбрано новых фото: ${selectedImages.length}` : 'Выберите файлы изображений' }}
             </label>
           </div>
           
-          <div v-if="imagePreview || currentTask.image_url" class="preview-container">
-            <img :src="imagePreview || ('https://ege-api2-gsihx.amvera.io' + currentTask.image_url)" class="image-preview" alt="Превью" />
-            <button type="button" @click="removeImage" class="remove-btn">Удалить фото</button>
+          <div v-if="selectedImages.length > 0" class="selected-files-list">
+            <div v-for="(file, index) in selectedImages" :key="'img-'+index" class="file-item">
+              <span class="file-name">🖼 {{ file.name }}</span>
+              <button type="button" @click="removeSelectedImage(index)" class="remove-tiny-btn">✕</button>
+            </div>
+          </div>
+
+          <div v-if="currentTask.image_url" class="preview-container">
+            <p>Старое фото в базе:</p>
+            <img :src="'https://ege-api2-gsihx.amvera.io' + currentTask.image_url" class="image-preview" alt="Превью" />
           </div>
         </div>
 
         <div class="form-group" v-if="currentTask.subject === 'Информатика'">
-          <label>Прикрепленный файл (txt, xlsx - необязательно):</label>
+          <label>Прикрепленные файлы (txt, xlsx - можно несколько):</label>
           <div class="file-upload-wrapper">
            <input type="file" @change="handleDocsUpload" accept=".txt,.csv,.xlsx,.xls,.doc,.docx" class="file-input" id="doc-input" multiple />
             <label for="doc-input" class="file-label doc-label">
-              {{ selectedDoc ? 'Файл готов: ' + selectedDoc.name : '📥 Прикрепить документ к задаче' }}
+              {{ selectedDocs.length > 0 ? `Выбрано файлов: ${selectedDocs.length}` : '📥 Прикрепить документы к задаче' }}
             </label>
           </div>
-          <div v-if="currentTask.file_url && !selectedDoc" class="preview-container">
+          
+          <div v-if="selectedDocs.length > 0" class="selected-files-list">
+            <div v-for="(file, index) in selectedDocs" :key="'doc-'+index" class="file-item">
+              <span class="file-name">📄 {{ file.name }}</span>
+              <button type="button" @click="removeSelectedDoc(index)" class="remove-tiny-btn">✕</button>
+            </div>
+          </div>
+
+          <div v-if="currentTask.file_url" class="preview-container">
             Текущий файл: <a :href="'https://ege-api2-gsihx.amvera.io' + currentTask.file_url" target="_blank">Скачать</a>
           </div>
         </div>
@@ -119,9 +134,8 @@ const isLoadingTasks = ref(false);
 const isEditing = ref(false);
 const editId = ref(null);
 
-// Разделяем файлы на картинки и документы
+// Массивы для хранения НОВЫХ файлов
 const selectedImages = ref([]);
-const imagePreview = ref(null);
 const selectedDocs = ref([]);
 
 const currentTask = reactive({
@@ -161,9 +175,9 @@ const startEdit = (task) => {
   currentTask.image_url = task.image_url;
   currentTask.file_url = task.file_url;
   
-  selectedImage.value = null;
-  imagePreview.value = null;
-  selectedDoc.value = null;
+  // Очищаем очереди новых загрузок при открытии редактирования
+  selectedImages.value = [];
+  selectedDocs.value = [];
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -180,27 +194,32 @@ const resetForm = () => {
   currentTask.correct_answer = '';
   currentTask.image_url = null;
   currentTask.file_url = null;
-  removeImage();
-  selectedDoc.value = null;
+  
+  selectedImages.value = [];
+  selectedDocs.value = [];
 };
 
-// Обработка загрузки картинки
+// Обработка загрузки картинок (добавление в массив)
 const handleImagesUpload = (event) => {
-  // Array.from превращает список файлов в удобный массив
-  selectedImages.value = Array.from(event.target.files);
+  const newFiles = Array.from(event.target.files);
+  selectedImages.value.push(...newFiles);
+  event.target.value = ''; // Сброс поля, чтобы можно было выбрать тот же файл снова
 };
 
-// Обработка загрузки документа
+// Обработка загрузки документов (добавление в массив)
 const handleDocsUpload = (event) => {
-  selectedDocs.value = Array.from(event.target.files);
+  const newFiles = Array.from(event.target.files);
+  selectedDocs.value.push(...newFiles);
+  event.target.value = ''; 
 };
 
-const removeImage = () => {
-  selectedImage.value = null;
-  imagePreview.value = null;
-  currentTask.image_url = null;
-  const input = document.getElementById('image-input');
-  if (input) input.value = '';
+// Удаление из массива по крестику
+const removeSelectedImage = (index) => {
+  selectedImages.value.splice(index, 1);
+};
+
+const removeSelectedDoc = (index) => {
+  selectedDocs.value.splice(index, 1);
 };
 
 const saveTask = async () => {
@@ -212,15 +231,17 @@ const saveTask = async () => {
   formData.append('content', currentTask.content);
   formData.append('correct_answer', currentTask.correct_answer);
   
-  if (selectedImage.value) {
-    formData.append('images', selectedImage.value);
-  }
-  // Добавляем документ в форму отправки
-  if (selectedDoc.value) {
-    formData.append('documents', selectedDoc.value);
-  }
+  // Добавляем ВСЕ картинки из массива
+  selectedImages.value.forEach(file => {
+    formData.append('images', file);
+  });
 
-try {
+  // Добавляем ВСЕ документы из массива
+  selectedDocs.value.forEach(file => {
+    formData.append('documents', file);
+  });
+
+  try {
     const baseUrl = 'https://ege-api2-gsihx.amvera.io';
     const url = isEditing.value 
       ? `${baseUrl}/api/admin/tasks/${editId.value}` 
@@ -238,26 +259,20 @@ try {
       }
     });
 
-    // --- НАЧАЛО НОВОЙ ЛОГИКИ СБРОСА ---
     if (isEditing.value) {
       alert('Задание обновлено!');
-      cancelEdit(); // Если редактировали — сбрасываем всё и выходим из режима
+      cancelEdit(); 
     } else {
       alert('Задание добавлено! Можно вводить следующее.');
-      // ЧАСТИЧНЫЙ СБРОС: очищаем только контент, оставляя предмет и номера
+      // ЧАСТИЧНЫЙ СБРОС
       currentTask.content = '';
       currentTask.correct_answer = '';
       currentTask.image_url = null;
       currentTask.file_url = null;
-      
-      // Очищаем прикрепленные файлы
-      removeImage();
-      selectedDoc.value = null;
-      
-      // Фокус автоматически возвращается в поле текста (удобно для быстрой вставки)
+      selectedImages.value = [];
+      selectedDocs.value = [];
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
 
     fetchAllTasks();
   } catch (error) {
@@ -275,7 +290,6 @@ try {
 const deleteTask = async (id) => {
   if (!confirm('Удалить задание?')) return;
   try {
-    // ВАЖНО: добавили /admin/ в путь
     await axios.delete(`https://ege-api2-gsihx.amvera.io/api/admin/tasks/${id}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
@@ -289,7 +303,6 @@ onMounted(fetchAllTasks);
 </script>
 
 <style scoped>
-/* Все твои предыдущие стили сохранены */
 .admin-container { display: flex; justify-content: center; padding: 40px 20px; background-color: #f0f2f5; min-height: 100vh; }
 .admin-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 750px; }
 h2 { color: #333; margin-bottom: 5px; }
@@ -301,7 +314,6 @@ h3 { color: #444; border-left: 4px solid #42b983; padding-left: 10px; margin-bot
 label { font-weight: 600; margin-bottom: 8px; color: #444; }
 input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
 .file-label { display: block; padding: 12px; background: #f8f9fa; border: 2px dashed #ccc; border-radius: 6px; text-align: center; cursor: pointer; }
-/* Добавил стиль для кнопки документа */
 .doc-label { border-color: #3498db; background: #eaf4fc; color: #2980b9; }
 .file-input { display: none; }
 .preview-container { text-align: center; margin-top: 10px; border: 1px solid #eee; padding: 10px; border-radius: 8px; font-size: 0.9rem;}
@@ -318,4 +330,11 @@ input, select, textarea { padding: 12px; border: 1px solid #ddd; border-radius: 
 .task-ctrl { display: flex; gap: 8px; }
 .edit-btn { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 .delete-btn { background: #ff4d4f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+
+/* НОВЫЕ СТИЛИ ДЛЯ СПИСКА ФАЙЛОВ */
+.selected-files-list { margin-top: 10px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px; }
+.file-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #fafafa; font-size: 0.85rem; }
+.file-item:last-child { border-bottom: none; }
+.remove-tiny-btn { background: none; border: none; color: #ff4d4f; cursor: pointer; font-weight: bold; padding: 0 5px; transition: 0.2s;}
+.remove-tiny-btn:hover { transform: scale(1.2); }
 </style>
